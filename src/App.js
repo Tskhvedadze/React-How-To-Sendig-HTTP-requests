@@ -4,24 +4,46 @@ import MoviesList from './components/MoviesList';
 import './App.css';
 
 function App() {
-
   const [movies, setMovies] = useState([]);
 
-  const fetchMoviesHandler = () => {
-    fetch('https://swapi.dev/api/films').then(res => {
-      return res.json()
-    }).then(data => {
-      const transformedMovies = data.results.map(movieData => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseData: movieData.release_date
-        }
-      })
-      setMovies(transformedMovies);
+  //** Using async / await which is another JS built - in features
+  //** Wich is more flexible and easy way then fetch() and then() - chaining method
+
+  async function fetchMoviesHandler() {
+    const res = await fetch('https://swapi.dev/api/films');
+    const data = await res.json();
+
+    const transformedMovies = data.results.map(movieData => {
+      return {
+        id: movieData.episode_id,
+        title: movieData.title,
+        openingText: movieData.opening_crawl,
+        releaseData: movieData.release_data
+      };
     });
+    setMovies(transformedMovies);
   }
+
+
+  //** Here we are using JS fetch() method and then() chaining features 
+  //** to transofrm responses JSON formated code such like JS object to 
+  //** react them and fetch the date just we want to display in the browser
+
+  // const fetchMoviesHandler = () => {
+  //   fetch('https://swapi.dev/api/films').then(res => {
+  //     return res.json()
+  //   }).then(data => {
+  //     const transformedMovies = data.results.map(movieData => {
+  //       return {
+  //         id: movieData.episode_id,
+  //         title: movieData.title,
+  //         openingText: movieData.opening_crawl,
+  //         releaseData: movieData.release_date
+  //       }
+  //     })
+  //     setMovies(transformedMovies);
+  //   });
+  // }
 
   return (
     <React.Fragment>
