@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -14,8 +14,7 @@ function App() {
 
   //** Using async / await which is another JS built - in features
   //** Wich is more flexible and easy way then fetch() and then() - chaining method
-
-  async function fetchMoviesHandler() {
+  const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -40,7 +39,13 @@ function App() {
       setError(error.message)
     }
     setIsLoading(false);
-  }
+  }, []);
+
+  //use 'useEffect' hook for an side effect behavior
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler])
+
 
 
   //** Here we are using JS fetch() method and then() chaining features 
