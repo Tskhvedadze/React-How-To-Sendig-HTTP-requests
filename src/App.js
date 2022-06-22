@@ -6,22 +6,40 @@ import './App.css';
 function App() {
   const [movies, setMovies] = useState([]);
 
+  // Add Loading Data 
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Error Handler
+  const [error, setError] = useState(null);
+
   //** Using async / await which is another JS built - in features
   //** Wich is more flexible and easy way then fetch() and then() - chaining method
 
   async function fetchMoviesHandler() {
-    const res = await fetch('https://swapi.dev/api/films');
-    const data = await res.json();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('https://swapi.dev/api/films');
 
-    const transformedMovies = data.results.map(movieData => {
-      return {
-        id: movieData.episode_id,
-        title: movieData.title,
-        openingText: movieData.opening_crawl,
-        releaseData: movieData.release_data
-      };
-    });
-    setMovies(transformedMovies);
+      if (res.status !== 200) {
+        throw new Error('Something went wrong');
+      }
+
+      const data = await res.json();
+
+      const transformedMovies = data.results.map(movieData => {
+        return {
+          id: movieData.episode_id,
+          title: movieData.title,
+          openingText: movieData.opening_crawl,
+          releaseData: movieData.release_data
+        };
+      });
+      setMovies(transformedMovies);
+    } catch (error) {
+      setError(error.message)
+    }
+    setIsLoading(false);
   }
 
 
@@ -45,13 +63,25 @@ function App() {
   //   });
   // }
 
+  let content = <p>Found no movies.</p>
+
+  if (movies.length > 0) {
+    content = <MoviesList movies={movies} />
+  }
+  if (error) {
+    content = <p>{error}</p>
+  }
+  if (isLoading) {
+    content = <p>Loading...</p>
+  }
+
   return (
     <React.Fragment>
       <section>
         <button onClick={fetchMoviesHandler} >Fetch Movies</button>
       </section>
       <section>
-        <MoviesList movies={movies} />
+        {content}
       </section>
     </React.Fragment>
   );
