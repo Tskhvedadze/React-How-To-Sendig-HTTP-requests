@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
+import AddMovie from './components/AddMovie';
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -14,11 +15,13 @@ function App() {
 
   //** Using async / await which is another JS built - in features
   //** Wich is more flexible and easy way then fetch() and then() - chaining method
+
+  // Make "GET"request to send data 
   const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch('https://swapi.dev/api/films');
+      const res = await fetch('https://react-http-88e46-default-rtdb.firebaseio.com/movies.json');
 
       if (res.status !== 200) {
         throw new Error('Something went wrong');
@@ -26,15 +29,18 @@ function App() {
 
       const data = await res.json();
 
-      const transformedMovies = data.results.map(movieData => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseData: movieData.release_data
-        };
-      });
-      setMovies(transformedMovies);
+      const loadedMovies = [];
+
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseData: data[key].releaseData
+        })
+      }
+
+      setMovies(loadedMovies);
     } catch (error) {
       setError(error.message)
     }
@@ -46,6 +52,18 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler])
 
+  // Make "POST" request to store data
+  async function addMovieHandler(movie) {
+    const res = await fetch('https://react-http-88e46-default-rtdb.firebaseio.com/movies.json', {
+      method: 'POST',
+      body: JSON.stringify(movie),
+      headers: {
+        'Content-type': 'application/json'
+      }
+    });
+    const data = res.json();
+    console.log(data);
+  }
 
 
   //** Here we are using JS fetch() method and then() chaining features 
@@ -83,11 +101,12 @@ function App() {
   return (
     <React.Fragment>
       <section>
-        <button onClick={fetchMoviesHandler} >Fetch Movies</button>
+        <AddMovie onAddMovie={addMovieHandler} />
       </section>
       <section>
-        {content}
+        <button onClick={fetchMoviesHandler} >Fetch Movies</button>
       </section>
+      <section>{content}</section>
     </React.Fragment>
   );
 }
